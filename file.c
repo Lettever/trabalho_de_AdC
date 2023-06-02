@@ -4,15 +4,15 @@
 #define BAUD 9600
 #define MYUBRR F_CPU/16/BAUD-1
 
-char *line = "**********************************************************";
-char *messages[] = {"*** Eng. Informatica, Arquitetura de Computadores, TP2 = ",
-					"*** Turma 02, Grupo 09                                 ***"};
+char *line = "**********************************************************\n";
+char *messages[] = {"*** Eng. Informatica, Arquitetura de Computadores, TP2 ***\n",
+					"*** Turma 02, Grupo 09                                 ***\n"};
 
-char *options[]	 = {"(1) Movimento para DIREITA",
-					"(2) Movimento para ESQUERDA",
-					"(3) Apagar LEDs",
-					"(4) Acender TODOS",
-					"(5) Imprimir MENU"};
+char *options[]	 = {"(1) Movimento para DIREITA\n",
+					"(2) Movimento para ESQUERDA\n",
+					"(3) Apagar LEDs\n",
+					"(4) Acender TODOS\n",
+					"(5) Imprimir MENU\n"};
 
 void USART_Init(uint16_t ubrr)
 {
@@ -35,6 +35,20 @@ void UART_puts(char* s)
 	while(*s > 0)
 		UART_putc(*s++);
 }
+void UART_putU8(uint8_t val)
+{
+	uint8_t dig1 = '0', dig2 = '0';
+	// count value in 100s place
+	while(val >= 100)
+	{
+		val -= 100; dig1++;
+	}
+	// count value in 10s place
+	while(val >= 10)
+	{
+		val -= 10; dig2++;
+	}
+}
 uint8_t UART_getc(void)
 {
 	// wait for data
@@ -45,25 +59,23 @@ uint8_t UART_getc(void)
 		if(SHIFT_LEFT_BUTTON)														//se o botao da esquerda for ativo
 			return '2';																//retorna o char '2'
 	}
-	UART_puts("OK");UART_putc('\n');												//se um char for escrito, escreve "OK!"
+	UART_puts("ECO: ");
+	UART_putU8(UDR0);
+	UART_puts("\nOK\n");															//se um char for escrito, escreve "OK!"
 	return UDR0;																	//e retorna esse char
 }
 void print_indentificacao()
 {
-	UART_puts(line);UART_putc('\n');
+	UART_puts(line);
 	for(uint8_t i = 0; i < 2; i++)
-	{
-		UART_puts(messages[i]);UART_putc('\n');
-	}
-	UART_puts(line);UART_putc('\n');
+		UART_puts(messages[i]);
+	UART_puts(line);
 }
 void print_menu()
 {
 	for(uint8_t i = 0; i < 5; i++)
-	{
-		UART_puts(options[i]);UART_putc('\n');
-	}
-	UART_puts(line);UART_putc('\n');
+		UART_puts(options[i]);
+	UART_puts(line);
 }
 void init_UART()
 {

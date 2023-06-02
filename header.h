@@ -36,6 +36,7 @@ void USART_Init(uint16_t ubrr);
 uint8_t UART_getc(void);
 void UART_putc(uint8_t data);
 void UART_puts(char* s);
+void UART_putU8(uint8_t val);
 void print_indentificacao();
 void print_menu();
 

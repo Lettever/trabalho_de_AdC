@@ -15,8 +15,8 @@
 #define SHIFT_LED_LEFT (led >> 1)
 #define SHIFT_LED_RIGHT (led << 1)
 
-#define FIRST_PIN_VALUE 0x01
-#define LAST_PIN_VALUE 0x08
+#define FIRST_LED_VALUE 0x01
+#define LAST_LED_VALUE 0x08
 #define ALL_LED_VALUE 0x0F
 
 #define SHIFT_LEFT_BUTTON ((botstate >> 2) & ON)

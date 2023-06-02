@@ -40,62 +40,55 @@ uint8_t UART_getc(void)
 	// wait for data
 	while(!(UCSR0A & (1 << RXC0)))
 	{
-		if(SHIFT_RIGHT_BUTTON)
-			return '1';
-		if(SHIFT_LEFT_BUTTON)
-			return '2';
+		if(SHIFT_RIGHT_BUTTON)														//se o botao da direita for ativo
+			return '1';																//retorna o char '1'
+		if(SHIFT_LEFT_BUTTON)														//se o botao da esquerda for ativo
+			return '2';																//retorna o char '2'
 	}
-	UART_puts("OK");
-	UART_putc('\n');
-	// return data
-	return UDR0;
+	UART_puts("OK");UART_putc('\n');												//se um char for escrito, escreve "OK!"
+	return UDR0;																	//e retorna esse char
 }
 void print_indentificacao()
 {
-	UART_puts(line);
-	UART_putc('\n');
+	UART_puts(line);UART_putc('\n');
 	for(uint8_t i = 0; i < 2; i++)
 	{
-		UART_puts(messages[i]);
-		UART_putc('\n');
+		UART_puts(messages[i]);UART_putc('\n');
 	}
-	UART_puts(line);
-	UART_putc('\n');
+	UART_puts(line);UART_putc('\n');
 }
 void print_menu()
 {
 	for(uint8_t i = 0; i < 5; i++)
 	{
-		UART_puts(options[i]);
-		UART_putc('\n');
+		UART_puts(options[i]);UART_putc('\n');
 	}
-	UART_puts(line);
-	UART_putc('\n');
+	UART_puts(line);UART_putc('\n');
 }
 void init_UART()
 {
-	USART_Init(MYUBRR);
+	USART_Init(MYUBRR);																//inicializa o UART
 }
 void init_IOs()
 {
-	DDRB = OUTPUT;																	//configuraÃ§Ã£o dos portos
+	DDRB = OUTPUT;																	//configuração dos portos
 	DDRD = INPUT;
 }
 void shift_led_left()
 {
 	is_pressed = TRUE;
 	if(led == OFF)																	//se nenhum led estiver ligado
-		led = LAST_PIN_VALUE;														//liga o ultimo led
+		led = LAST_LED_VALUE;														//liga o ultimo led
 	else
-		led = SHIFT_LED_LEFT;														//desligamos o led ligado e ligamos o led da esquerda
+		led = SHIFT_LED_LEFT;														//desliga o led ligado e liga o led da esquerda
 }
 void shift_led_right()
 {
 	is_pressed = TRUE;
-	if(led >= LAST_PIN_VALUE)														//se o ultimo led estiver ligado
-		led = OFF;																	//desligamos esses led
+	if(led == LAST_LED_VALUE)														//se o ultimo led estiver ligado
+		led = OFF;																	//desliga os leds
 	else if(led == OFF)																//se nenhum led estiver ligado
-		led = FIRST_PIN_VALUE;														//ligamos o primeiro led
+		led = FIRST_LED_VALUE;														//liga o primeiro led
 	else
-		led = SHIFT_LED_RIGHT;														//desligamos o led ligamos e ligamos o led da direita
+		led = SHIFT_LED_RIGHT;														//desliga o led ligado e liga o led da direita
 }

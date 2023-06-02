@@ -78,7 +78,7 @@ void init_UART()
 }
 void init_IOs()
 {
-	DDRB = OUTPUT;																	//configuração dos portos
+	DDRB = OUTPUT;																	//configuraÃ§Ã£o dos portos
 	DDRD = INPUT;
 }
 void shift_led_left()

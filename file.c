@@ -9,10 +9,10 @@ char *messages[] = {"*** Eng. Informatica, Arquitetura de Computadores, TP2 ***\
 					"*** Turma 02, Grupo 09                                 ***\n"};
 
 char *options[]	 = {"(1) Movimento para DIREITA\n",
-					"(2) Movimento para ESQUERDA\n",
-					"(3) Apagar LEDs\n",
-					"(4) Acender TODOS\n",
-					"(5) Imprimir MENU\n"};
+				"(2) Movimento para ESQUERDA\n",
+				"(3) Apagar LEDs\n",
+				"(4) Acender TODOS\n",
+				"(5) Imprimir MENU\n"};
 
 void USART_Init(uint16_t ubrr)
 {
@@ -35,6 +35,12 @@ void UART_puts(char* s)
 	while(*s > 0)
 		UART_putc(*s++);
 }
+uint8_t UART_getc(void)
+{
+	// wait for data
+	while(!(UCSR0A & (1 << RXC0)));
+	return UDR0;
+}
 void UART_putU8(uint8_t val)
 {
 	uint8_t dig1 = '0', dig2 = '0';
@@ -50,21 +56,24 @@ void UART_putU8(uint8_t val)
 		val -= 10;
 		dig2++;
 	}
+	// print first digit (or ignore leading zeros)
+	if(dig1 != '0') UART_putc(dig1);
+	// print second digit (or ignore leading zeros)
+	if((dig1 != '0') || (dig2 != '0')) UART_putc(dig2);
+	// print final digit
+	UART_putc(val + '0');
 }
-uint8_t UART_getc(void)
+void UART_puthex8(uint8_t val)
 {
-	// wait for data
-	while(!(UCSR0A & (1 << RXC0)))
-	{
-		if(SHIFT_RIGHT_BUTTON)														//se o botao da direita for ativo
-			return '1';																//retorna o char '1'
-		if(SHIFT_LEFT_BUTTON)														//se o botao da esquerda for ativo
-			return '2';																//retorna o char '2'
-	}
-	UART_puts("ECO: ");
-	UART_putU8(UDR0);
-	UART_puts("\nOK\n");															//se um char for escrito, escreve "OK!"
-	return UDR0;																	//e retorna esse char
+	// extract upper and lower nibbles from input value
+	uint8_t upperNibble = (val & 0xF0) >> 4;
+	uint8_t lowerNibble = val & 0x0F;
+	// convert nibble to its ASCII hex equivalent
+	upperNibble += upperNibble > 9 ? 'A' - 10 : '0';
+	lowerNibble += lowerNibble > 9 ? 'A' - 10 : '0';
+	// print the characters
+	UART_putc(upperNibble);
+	UART_putc(lowerNibble);
 }
 void print_indentificacao()
 {
@@ -77,7 +86,6 @@ void print_menu()
 {
 	for(uint8_t i = 0; i < 5; i++)
 		UART_puts(options[i]);
-	UART_puts(line);
 }
 void init_UART()
 {
@@ -85,24 +93,25 @@ void init_UART()
 }
 void init_IOs()
 {
-	DDRB = OUTPUT;																	//configuraÃ§Ã£o dos portos
+	DDRB = OUTPUT;																	//configuração dos portos
 	DDRD = INPUT;
 }
 void shift_led_left()
 {
 	is_pressed = TRUE;
 	if(led == OFF)																	//se nenhum led estiver ligado
-		led = LAST_LED_VALUE;														//liga o ultimo led
+	led = LAST_LED_VALUE;															//liga o ultimo led
 	else
-		led = SHIFT_LED_LEFT;														//desliga o led ligado e liga o led da esquerda
+	led = SHIFT_LED_LEFT;															//desliga o led ligado e liga o led da esquerda
 }
 void shift_led_right()
 {
 	is_pressed = TRUE;
 	if(led == LAST_LED_VALUE)														//se o ultimo led estiver ligado
-		led = OFF;																	//desliga os leds
+		led = OFF;																		//desliga os leds
 	else if(led == OFF)																//se nenhum led estiver ligado
-		led = FIRST_LED_VALUE;														//liga o primeiro led
-	else
-		led = SHIFT_LED_RIGHT;														//desliga o led ligado e liga o led da direita
+		led = FIRST_LED_VALUE;															//liga o primeiro le
+	else 
+		led = SHIFT_LED_RIGHT;															//desliga o led ligado e liga o led da direita
+	led &= ~0xF0;
 }

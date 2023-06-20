@@ -38,7 +38,7 @@
  
 #define SET_POINT 512
 #define H 200
- 
+
 //primeiro botao muda o modo entre manual e automatico
 //o segundo botao lida/desliga o rele quando no modo manual
  

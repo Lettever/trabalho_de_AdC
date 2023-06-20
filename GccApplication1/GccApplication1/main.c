@@ -14,8 +14,8 @@ int main(void)
 	print_menu();
 	while(TRUE)
 	{
-		ldr = read_ADC(ADC_PIN); //ler ldr aqui
 		input = PIND;
+		ldr = read_ADC(ADC_PIN); //ler ldr aqui
 		if(UCSR0A & (1 << RXC0))
 			UART_option = get_option();
 		else if(GET_BIT(input, CHANGE_MODE_PIN))
@@ -27,9 +27,9 @@ int main(void)
 		else if(mode == AUTO)
 			do_auto_stuff();
 		set_colours();
-		PORTB = output;
 		if(UART_option == MENU_OPTION)
 			print_menu();
+		PORTB = output;
 	}
 }
 

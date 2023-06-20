@@ -14,10 +14,10 @@ char *line = "**********************************************************\n";
 char *id[2] ={"*** Eng. Informatica, Arquitetura de Computadores, TP3 ***\n",
 				"*** Turma 02, Grupo 09, 2023/23                        ***\n"};
 char *options[5] = {"\t1:   Modo MANUAL\n",
-					"\t2:   Ligar relÈ\n",
-					"\t3:   Desligar relÈ\n",
-					"\t4:   Modo Autom·tico\n",
-					"\t5:   Imprimir MENU\n"};
+					"\t2:   Ligar rel√©\n",
+					"\t3:   Desligar rel√©\n",
+					"\t4:   Modo Autom√°tico\n",
+					"\t9:   Imprimir MENU\n"};
  
 void USART_Init(uint16_t ubrr)
 {
@@ -61,11 +61,11 @@ void print_menu()
 u8 get_option()
 {
 	u8 result = UART_getc();
-	UART_putc(result + '0');
+	UART_putc(result);
 	if(('1' <= result && result <= '4') || (result == '9'))
-		UART_puts("OK\n");
+		UART_puts("\nOK\n");
 	else
-		UART_puts("Comando invalido\n");
+		UART_puts("\nComando invalido\n");
 	if(result != MENU_OPTION)
 		UART_puts(">> ");
 	return result;
@@ -81,15 +81,31 @@ void UART_init()
 }
 void change_mode()
 {
-	if(mode == MANUAL)
+	if(UART_option == MANUAL_MODE_OPTION)
+		mode = MANUAL;
+	if(UART_option == AUTO_MODE_OPTION)
 		mode = AUTO;
 	else
-		mode = MANUAL;
+	if(GET_BIT(input, CHANGE_MODE_PIN))
+		if(!GET_BIT(is_pressed, CHANGE_MODE_PIN))
+		{
+			SET_BIT(is_pressed, CHANGE_MODE_PIN);
+			if(mode == MANUAL)
+			mode = AUTO;
+			else
+			mode = MANUAL;
+		}
 }
 void do_manual_stuff()
 {
 	if(GET_BIT(input, MANUAL_PIN))
-		FLIP_BIT(output, RELE_PIN);
+	{
+		if(!GET_BIT(is_pressed, MANUAL_PIN))
+		{
+			FLIP_BIT(output, RELE_PIN);
+			SET_BIT(is_pressed, MANUAL_PIN);
+		}
+	}
 	else if(UART_option == TURN_ON_OPTION)						//valor obtido no get_option()
 		SET_BIT(output, RELE_PIN);
 	else if(UART_option == TURN_OFF_OPTION)						//valor obtido no get_option()
@@ -100,7 +116,7 @@ void do_auto_stuff()
 	if(ldr < SET_POINT - (H / 2))
 		SET_BIT(output, RELE_PIN);
 	else if(ldr > SET_POINT + (H / 2))
-		RESET_BIT(output, RELE_PIN);	
+		RESET_BIT(output, RELE_PIN);		
 }
 void set_colours()
 {
@@ -127,9 +143,9 @@ void ADC_init()
 }
 u16 read_ADC(u8 channel)
 {
-	ADMUX = (ADMUX & 0x0F) | (channel = 0x0F);
-	ADCSRA |= (1 << ADSC);
-	while(ADCSRA & (1 << ADSC));
-	ADCSRA |= (1 << ADIF);
-	return ADC;
+	ADMUX = (ADMUX & 0xF0) | (channel & 0x0F);		// Select ADC channel
+	ADCSRA |= (1<<ADSC);							// Single conversion mode
+	while(ADCSRA & (1<<ADSC));						// Wait ADC conversion
+	ADCSRA |= (1<<ADIF);							// Clear interrupt flag
+	return ADC;										// ADC = ADCH<<8 | ADCL;
 }
